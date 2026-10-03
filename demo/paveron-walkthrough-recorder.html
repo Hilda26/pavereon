@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Paveron Walkthrough Recorder</title>
+    <style>
+      body {
+        margin: 0;
+        background: #061819;
+        color: #e3fff7;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+      canvas {
+        display: block;
+        width: 1280px;
+        height: 720px;
+      }
+      button {
+        margin: 16px;
+        padding: 12px 18px;
+        border: 1px solid #76ebd5;
+        background: #0e3032;
+        color: #e3fff7;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="record">Record WebM</button>
+    <canvas id="stage" width="1280" height="720"></canvas>
+    <script>
+      const frames = [
+        ["paveron-00-title.png", "Paveron walkthrough", "Parametric insurance capsules on GenLayer StudioNet."],
+        ["paveron-01-dashboard.png", "Live pool dashboard", "The app reads real pool state: reserve, available capacity, incidents, and active coverage."],
+        ["paveron-03-open-cover-form.png", "Open a cover", "A policy-like capsule defines risk domain, region, trigger, public source, premium, payout cap, and term."],
+        ["paveron-02-covers.png", "Coverage atlas", "The cover pool lists active capsules with state, reserved payout capacity, and public evidence source."],
+        ["paveron-04-cover-detail.png", "Inspect coverage", "Reviewers can inspect live contract-backed state and the seed cover used for the demo."],
+        ["paveron-05-tests.png", "Actual testing", "Schema verification, direct contract tests, frontend tests, lint, TypeScript, and production build passed."],
+        ["paveron-06-parameters.png", "Submission package", "The final slide contains the live app, GitHub repo, contract, deployment tx, and one-liner."],
+      ];
+      const canvas = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const loadImage = (src) => new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+      function wrapText(text, maxWidth) {
+        const words = text.split(" ");
+        const lines = [];
+        let line = "";
+        for (const word of words) {
+          const next = line ? `${line} ${word}` : word;
+          if (ctx.measureText(next).width > maxWidth) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = next;
+          }
+        }
+        if (line) lines.push(line);
+        return lines;
+      }
+      function drawFrame(image, title, caption, progress) {
+        ctx.fillStyle = "#061819";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0e3032";
+        ctx.fillRect(0, 0, canvas.width, 112);
+        ctx.fillStyle = "#76ebd5";
+        ctx.font = "700 28px Segoe UI, Arial";
+        ctx.fillText(title, 42, 45);
+        ctx.fillStyle = "#c7eee5";
+        ctx.font = "20px Segoe UI, Arial";
+        let y = 78;
+        for (const line of wrapText(caption, 1090)) {
+          ctx.fillText(line, 42, y);
+          y += 25;
+        }
+        const maxW = canvas.width - 84;
+        const maxH = canvas.height - 176;
+        const scale = Math.min(maxW / image.width, maxH / image.height);
+        const w = image.width * scale;
+        const h = image.height * scale;
+        const x = (canvas.width - w) / 2;
+        const imageY = 140 + Math.sin(progress * Math.PI) * 5;
+        ctx.shadowColor = "rgba(0,0,0,.28)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 8;
+        ctx.drawImage(image, x, imageY, w, h);
+        ctx.shadowColor = "transparent";
+        ctx.strokeStyle = "#76ebd5";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, imageY, w, h);
+        ctx.fillStyle = "#76ebd5";
+        ctx.fillRect(42, canvas.height - 24, (canvas.width - 84) * progress, 5);
+      }
+      async function record() {
+        const loaded = [];
+        for (const frame of frames) loaded.push(await loadImage(frame[0]));
+        const stream = canvas.captureStream(30);
+        const recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+        const chunks = [];
+        recorder.ondataavailable = (event) => {
+          if (event.data.size) chunks.push(event.data);
+        };
+        recorder.start();
+        for (let i = 0; i < frames.length; i++) {
+          const duration = i >= 5 ? 6200 : 5200;
+          const start = performance.now();
+          while (performance.now() - start < duration) {
+            const progress = Math.min(1, (performance.now() - start) / duration);
+            drawFrame(loaded[i], frames[i][1], frames[i][2], progress);
+            await sleep(33);
+          }
+        }
+        await new Promise((resolve) => {
+          recorder.onstop = resolve;
+          recorder.stop();
+        });
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "paveron-walkthrough-video.webm";
+        a.click();
+      }
+      document.getElementById("record").addEventListener("click", record);
+    </script>
+  </body>
+</html>
