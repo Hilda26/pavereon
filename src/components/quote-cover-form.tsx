@@ -30,6 +30,7 @@ export function QuoteCoverForm({ onFinalized }: { onFinalized: () => Promise<voi
     && isHttpsUrl(sourceUrl)
     && Number.parseInt(premium || "0", 10) > 0
     && Number.parseInt(payoutCap || "0", 10) > 0;
+  const reserveTopupValid = Number.parseInt(reserveTopup || "0", 10) > 0;
 
   return (
     <section className="panel submit-panel">
@@ -38,11 +39,10 @@ export function QuoteCoverForm({ onFinalized }: { onFinalized: () => Promise<voi
       <NetworkGuard />
       {error && <p className="form-error">{error}</p>}
       <div className="reserve-box">
-        <div>
-          <span>Pool capacity</span>
-          <strong>{reserveTopup} GEN</strong>
-        </div>
-        <button type="button" className="quiet" disabled={wrongNetwork} onClick={() => void send("Fund reserve", "fund_reserve", [], BigInt(reserveTopup || "0"))}>
+        <label>Reserve top-up
+          <input inputMode="numeric" value={reserveTopup} onChange={(event) => setReserveTopup(event.target.value.replace(/\D/g, ""))} />
+        </label>
+        <button type="button" className="quiet" disabled={wrongNetwork || !reserveTopupValid} onClick={() => void send("Fund reserve", "fund_reserve", [], BigInt(reserveTopup || "0"))}>
           <Coins size={16} /> Top up
         </button>
       </div>

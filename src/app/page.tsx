@@ -37,7 +37,7 @@ export default function Home() {
           <p className="lede">Paveron turns public signals into calm, time-boxed coverage capsules with reserved payout capacity and validator-resolved incident lanes.</p>
           <div className="searchbar">
             <Search size={17} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search covers, regions, risk domains, or states" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search covers" />
           </div>
         </div>
         <div className="orbital-panel" aria-label="Pool reserve status">
@@ -62,7 +62,7 @@ export default function Home() {
           </div>
           <div className="covers-grid">
             {covers.map((cover) => <CoverCard key={String(cover.id)} cover={cover} />)}
-            {covers.length === 0 && !loading && <EmptyPool />}
+            {covers.length === 0 && !loading && !error && <EmptyPool />}
           </div>
         </div>
         <QuoteCoverForm onFinalized={refresh} />

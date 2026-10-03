@@ -32,6 +32,15 @@ export const EMPTY_LEDGER: Ledger = {
 export const txUrl = (hash: string) => `${explorer}/tx/${hash}`;
 export const addressUrl = (address: string) => `${explorer}/address/${address}`;
 
+type EncodedArg =
+  | string
+  | number
+  | boolean
+  | null
+  | EncodedArg[]
+  | { __paveronBigInt: string }
+  | { [key: string]: EncodedArg };
+
 function client(account?: `0x${string}`) {
   return createClient({ chain: studionet, endpoint, account, provider: typeof window === "undefined" ? undefined : window.ethereum });
 }
@@ -42,11 +51,33 @@ function configuredAddress(): `0x${string}` {
 }
 
 export async function readContract<T>(functionName: string, args: CalldataEncodable[] = []): Promise<T> {
+  if (typeof window !== "undefined") {
+    const response = await fetch("/api/paveron/read", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ functionName, args: args.map(encodeArg) }),
+    });
+    const payload = await response.json() as { result?: T; error?: string };
+    if (!response.ok || payload.error) {
+      throw new Error(`Unable to read Paveron on StudioNet: ${payload.error ?? response.statusText}`);
+    }
+    return payload.result as T;
+  }
+
   try {
     return await client().readContract({ address: configuredAddress(), functionName, args }) as T;
   } catch (error) {
     throw new Error(`Unable to read Paveron on StudioNet: ${error instanceof Error ? error.message : "RPC request failed."}`);
   }
+}
+
+function encodeArg(value: CalldataEncodable): EncodedArg {
+  if (typeof value === "bigint") return { __paveronBigInt: value.toString() };
+  if (Array.isArray(value)) return value.map((item) => encodeArg(item as CalldataEncodable));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, encodeArg(item as CalldataEncodable)]));
+  }
+  return value as EncodedArg;
 }
 
 export async function loadLedger(): Promise<Ledger> {
