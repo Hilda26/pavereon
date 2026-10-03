@@ -5,7 +5,9 @@
 - Network: GenLayer StudioNet
 - Contract: `0x5e411855907E019d83D7413e99b8F32aEB875623`
 - Deploy transaction: `0x23525dd8ebdd2baea60a682fbd8a4dd9d22f8fbdb661077d55b3febf2420ae0e`
-- Live app: pending Vercel deployment
+- Live app: https://pavereon.vercel.app
+- Vercel deployment: `dpl_3ofLqdgjT18YjDhZd2U59QCcBbac`
+- Note: Vercel SSO deployment protection is currently enabled for generated domains.
 
 ## Implemented
 

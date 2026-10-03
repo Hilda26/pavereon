@@ -14,5 +14,5 @@ Paveron is built as an insurance-adjacent primitive with reserve-backed coverage
 ## Remaining review focus
 
 - Deploy the contract and record the StudioNet address.
-- Deploy the frontend with `NEXT_PUBLIC_PAVERON_CONTRACT` configured.
-- Run a final browser check against the deployed Vercel URL.
+- Disable Vercel SSO deployment protection or attach a public custom domain before submission.
+- Run a final unauthenticated browser check against the deployed Vercel URL.

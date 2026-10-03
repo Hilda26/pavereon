@@ -40,6 +40,8 @@ python scripts/deploy-paveron.py
 
 Current StudioNet contract: `0x5e411855907E019d83D7413e99b8F32aEB875623`
 
+Production app: https://pavereon.vercel.app
+
 ## Local checks
 
 ```bash

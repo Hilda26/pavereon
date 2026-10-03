@@ -44,4 +44,6 @@ python -m pytest tests/integration/test_paveron_deploy.py -q -s
 
 - StudioNet contract address: `0x5e411855907E019d83D7413e99b8F32aEB875623`
 - StudioNet deploy transaction: `0x23525dd8ebdd2baea60a682fbd8a4dd9d22f8fbdb661077d55b3febf2420ae0e`
-- Vercel live URL
+- Vercel live URL: https://pavereon.vercel.app
+- Vercel deployment id: `dpl_3ofLqdgjT18YjDhZd2U59QCcBbac`
+- Access note: Vercel SSO deployment protection is currently enabled for generated domains.
